@@ -1,0 +1,494 @@
+// src/components/AddEmployee.js
+import React, { useContext, useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
+import { EmployeeContext } from '../context/EmployeeContext';
+
+const AddEmployee = () => {
+  const { addEmployee } = useContext(EmployeeContext);
+  const history = useHistory();
+
+  const [employee, setEmployee] = useState({
+    id: '',
+    fullName: '',
+    email: '',
+    mobile: '',
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEmployee({ ...employee, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // You may want to add validation here before adding the employee
+    addEmployee(employee);
+    history.push('/dashboard');
+  };
+
+  return (
+    <div>
+      <h2>Add Employee</h2>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Employee ID:
+          <input
+            type="text"
+            name="id"
+            value={employee.id}
+            onChange={handleInputChange}
+          />
+        </label><br/>
+        <label>
+          Full Name:
+          <input
+            type="text"
+            name="fullName"
+            value={employee.fullName}
+            onChange={handleInputChange}
+          />
+        </label><br/>
+        <label>
+          Email:
+          <input
+            type="email"
+            name="email"
+            value={employee.email}
+            onChange={handleInputChange}
+          />
+        </label><br/>
+        <label>
+          Mobile:
+          <input
+            type="tel"
+            name="mobile"
+            maxLength={10}
+            value={employee.mobile}
+            onChange={handleInputChange}
+          />
+        </label><br/>
+        <button type="submit">Add Employee</button>
+      </form>
+      <Link to="/dashboard">
+        <button>Back to Dashboard</button>
+      </Link>
+    </div>
+  );
+};
+
+export default AddEmployee;
+
+
+// src/components/Dashboard.js
+import React from 'react';
+import { Link } from 'react-router-dom';
+import EmployeeTable from './EmployeeTable';
+
+const Dashboard = () => {
+  return (
+    <div>
+      <h2>Dashboard</h2>
+      <Link to="/add-employee">
+        <button>Add Employee</button>
+      </Link>
+      <EmployeeTable />
+    </div>
+  );
+};
+
+export default Dashboard;
+
+
+// src/components/EditEmployee.js
+import React, { useContext, useState, useEffect } from 'react';
+import { Link, useHistory, useParams } from 'react-router-dom';
+import { EmployeeContext } from '../context/EmployeeContext';
+
+const EditEmployee = () => {
+  const { employees, editEmployee } = useContext(EmployeeContext);
+  const history = useHistory();
+  const { id } = useParams();
+
+  const [employee, setEmployee] = useState({
+    id: '',
+    fullName: '',
+    email: '',
+    mobile: '',
+  });
+
+  useEffect(() => {
+    // Find the employee with the specified ID
+    const selectedEmployee = employees.find((emp) => emp.id === id);
+
+    if (selectedEmployee) {
+      setEmployee(selectedEmployee);
+    }
+  }, [employees, id]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEmployee({ ...employee, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // You may want to add validation here before editing the employee
+    editEmployee(id, employee);
+    history.push('/dashboard');
+  };
+
+  return (
+    <div>
+      <h2>Edit Employee</h2>
+      <form onSubmit={handleSubmit}>
+        <label>
+          Employee ID:
+          <input
+            type="text"
+            name="id"
+            value={employee.id}
+            onChange={handleInputChange}
+            readOnly
+          />
+        </label><br/>
+        <label>
+          Full Name:
+          <input
+            type="text"
+            name="fullName"
+            value={employee.fullName}
+            onChange={handleInputChange}
+          />
+        </label><br/>
+        <label>
+          Email:
+          <input
+            type="email"
+            name="email"
+            value={employee.email}
+            onChange={handleInputChange}
+          />
+        </label><br/>
+        <label>
+          Mobile:
+          <input
+            type="tel"
+            name="mobile"
+            value={employee.mobile}
+            onChange={handleInputChange}
+          />
+        </label><br/>
+        <button type="submit">Save Changes</button>
+      </form>
+      <Link to="/dashboard">
+        <button>Back to Dashboard</button>
+      </Link>
+    </div>
+  );
+};
+
+export default EditEmployee;
+
+
+// src/components/EmployeeTable.js
+import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { EmployeeContext } from '../context/EmployeeContext';
+
+const EmployeeTable = () => {
+  const { employees, deleteEmployee } = useContext(EmployeeContext);
+
+  return (
+    <div>
+      <h3>Employee List</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Mobile</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {employees.map((employee) => (
+            <tr key={employee.id}>
+              <td>{employee.id}</td>
+              <td>{employee.fullName}</td>
+              <td>{employee.email}</td>
+              <td>{employee.mobile}</td>
+              <td>
+                <Link to={`/edit-employee/${employee.id}`}>
+                  <button>Edit</button>
+                </Link>
+                <button onClick={() => deleteEmployee(employee.id)}>
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default EmployeeTable;
+
+
+// src/components/Login.js
+import React, { useContext, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+
+const Login = () => {
+  const history = useHistory();
+  const [credentials, setCredentials] = useState({ username: '', password: '' });
+
+  const handleLogin = () => {
+    // Check if username and password match the default values
+    if (credentials.username === 'admin' && credentials.password === 'admin') {
+      history.push('/dashboard');
+    } else {
+      alert('Invalid credentials');
+    }
+  };
+
+  return (
+    <div>
+      <h2>Login</h2>
+      <input
+        type="text"
+        placeholder="Username"
+        value={credentials.username}
+        onChange={(e) =>
+          setCredentials({ ...credentials, username: e.target.value })
+        }
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={credentials.password}
+        onChange={(e) =>
+          setCredentials({ ...credentials, password: e.target.value })
+        }
+      />
+      <button onClick={handleLogin}>Login</button>
+    </div>
+  );
+};
+
+export default Login;
+
+
+// src/context/EmployeeContext.js
+import React, { createContext, useState } from 'react';
+
+const EmployeeContext = createContext();
+
+const EmployeeProvider = ({ children }) => {
+  const [employees, setEmployees] = useState([]);
+
+  const addEmployee = (employee) => {
+    setEmployees([...employees, employee]);
+  };
+
+  const editEmployee = (id, updatedEmployee) => {
+    const updatedEmployees = employees.map((emp) =>
+      emp.id === id ? updatedEmployee : emp
+    );
+    setEmployees(updatedEmployees);
+  };
+
+  const deleteEmployee = (id) => {
+    const updatedEmployees = employees.filter((emp) => emp.id !== id);
+    setEmployees(updatedEmployees);
+  };
+
+  return (
+    <EmployeeContext.Provider
+      value={{ employees, addEmployee, editEmployee, deleteEmployee }}
+    >
+      {children}
+    </EmployeeContext.Provider>
+  );
+};
+
+export { EmployeeContext, EmployeeProvider };
+
+
+// src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { EmployeeProvider } from './context/EmployeeContext';
+import Login from './components/Login';
+import Dashboard from './components/Dashboard';
+import AddEmployee from './components/AddEmployee';
+import EditEmployee from './components/EditEmployee';
+
+const App = () => {
+  return (
+    <EmployeeProvider>
+      <Router>
+        <Switch>
+          <Route path="/" exact component={Login} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/add-employee" component={AddEmployee} />
+          <Route path="/edit-employee/:id" component={EditEmployee} />
+        </Switch>
+      </Router>
+    </EmployeeProvider>
+  );
+};
+
+export default App;
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+
+
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    box-sizing: border-box;
+    list-style: none;
+    text-decoration: none;
+}
+
+:root {
+    --color-bg: #1f1f30;
+    --color-bg-variant: #2c2c6c;
+    --color-primary: #4db5ff;
+    --color-primary-variant: rgba(77, 181, 255, 0.4);
+    --color-white: #fff;
+    --color-light: rgba(255, 255, 255, 0.6);
+
+    --transition: all 400ms ease;
+
+    --container-width-lg: 75%;
+    --container-width-md: 86%;
+    --container-width-sm: 90%;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar{
+    display: none;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-white);
+    line-height: 1.7;
+    background-image: url('../src/assets/bg-texture.png')
+}
+
+/* ================== GENEARL STYLES ==================== */
+
+.container {
+    width: var(--container-width-lg);
+    margin: 0 auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    font-weight: 500;
+}
+
+h1 {
+    font: size 2.5rem;
+}
+
+section {
+    margin-top:8rem;
+  
+}
+
+section > h2,
+section > h5 {
+    text-align: center;
+    color: var(--color-light);
+}
+
+section > h2{
+    color: var(--color-primary);
+    margin-bottom:3rem;
+}
+
+.text-light {
+    color: var(--color-light);
+}
+
+a {
+    color: var(--color-primary);
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--color-white);
+}
+
+.btn {
+    width: max-content;
+    display: inline-block;
+    color: var(--color-primary);
+    padding: 0.75rem 1.2rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    border: 1px solid var(--color-primary);
+    transition: var(--transition);
+}
+.btn:hover {
+    background: var(--color-white);
+    color: var(--color-bg);
+    border-color: transparent;
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: var(--color-bg);
+}
+
+img{
+    display: block;
+    width: 100%;
+    object-fit:  cover;
+}
+
+@media screen and (max-width: 1024px) {
+    .container {
+        width: var(--container-width-md);
+    }
+    section {
+        margin-top:6rem;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .container {
+        width: var(--container-width-sm);
+    }
+    section > h2{
+        margin-bottom:2rem;
+    }
+}
+
